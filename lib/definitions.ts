@@ -6,19 +6,17 @@ export type TUser = Document & {
     password: string;
     first_name: string;
     last_name: string;
+    nickname: string;
 };
 export type THousehold = Document & {
     _id?: string;
+    name: string;
     members: string[];
-    spending: string[];
+    expenses: string[];
 };
-export type TSpending = Document & {
+export type TExpenses = Document & {
     _id?: string;
-    month: {
-        month: string;
-        day: number;
-        year: number;
-    };
+    month: Date;
     rent: number;
     electricity: number;
     gas: number;
