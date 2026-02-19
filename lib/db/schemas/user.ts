@@ -1,6 +1,7 @@
 import mongoose, {Schema} from "mongoose";
 import {TUser} from "@/lib/definitions";
 
+
 const userSchema: Schema<TUser> = new Schema({
     first_name: {
         type: String,

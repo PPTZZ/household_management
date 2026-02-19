@@ -1,0 +1,34 @@
+import type {Metadata, Viewport} from "next";
+import "@/app/globals.css";
+import React from "react";
+
+export const metadata: Metadata = {
+    title: {
+        template: '%s | Home Manager',
+        default: "Home Manager"
+    },
+    description: "Keep track of your household expenses",
+};
+
+export const viewport: Viewport = {
+    width: 'device-width',
+    height: 'device-width',
+    initialScale: 1,
+}
+
+export default function RootLayout({
+                                       children,
+                                   }: Readonly<{
+    children: React.ReactNode;
+}>) {
+    return (
+        <html lang="en">
+        <body className={'bg-gray-200 antialiased flex flex-col min-h-screen '}>
+        <main className={'grow'}>
+
+            {children}
+        </main>
+        </body>
+        </html>
+    );
+}

@@ -27,7 +27,7 @@ export const POST = async (req: NextRequest) => {
         await Household.create(data)
         return NextResponse.json({status: 201})
     } catch (err: unknown) {
-        let errorMessage = "Failed to fetch households";
+        let errorMessage = "Failed to create household";
         if (err instanceof Error) {
             errorMessage = err.message;
             return NextResponse.json(
