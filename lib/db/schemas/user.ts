@@ -20,6 +20,7 @@ const userSchema: Schema<TUser> = new Schema({
         required: true
     },
     nickname: {
+        default: '',
         type: String,
     }
 }, {

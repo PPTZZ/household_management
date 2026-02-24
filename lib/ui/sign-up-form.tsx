@@ -1,9 +1,19 @@
 'use client'
-import React, {useActionState} from 'react'
+import React, {useActionState, useEffect} from 'react'
 import {signup} from "@/lib/services/actions";
+import {useRouter} from "next/navigation";
 
 const SignUpForm = () => {
-    const [state, action, pending] = useActionState(signup, undefined)
+    const [state, action, pending] = useActionState(signup, undefined);
+    const router = useRouter();
+    useEffect(() => {
+        if (state?.message) {
+            const timer = setTimeout(() => {
+                router.push('/login')
+            }, 1000)
+            return () => clearTimeout(timer)
+        }
+    }, [state?.message, router])
     return (
         <form action={action} className={'border size-64 bg-white flex flex-col'}>
             <div className={'flex flex-col'}>
@@ -25,6 +35,7 @@ const SignUpForm = () => {
                 <label htmlFor="password">Password</label>
                 <input className={'border'} id="password" name="password" type="password"/>
             </div>
+            {state?.message && <p>{state.message}</p>}
             {state?.errors?.password && (
                 <div>
                     <p>Password must:</p>
@@ -35,7 +46,7 @@ const SignUpForm = () => {
                     </ul>
                 </div>
             )}
-            <button type="submit">Sign Up</button>
+            <button disabled={pending} type="submit">Sign Up</button>
         </form>
     )
 }
