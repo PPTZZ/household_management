@@ -25,7 +25,6 @@ export default function RootLayout({
         <html lang="en">
         <body className={'bg-gray-200 antialiased flex flex-col min-h-screen '}>
         <main className={'grow'}>
-
             {children}
         </main>
         </body>

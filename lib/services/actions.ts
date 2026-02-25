@@ -3,6 +3,8 @@ import {FormState, SignupSchema} from '@/lib/definitions'
 import bcrypt from 'bcrypt'
 import dbConnect from "@/lib/db/connection";
 import User from "@/lib/db/schemas/user";
+import {createSession} from "@/lib/services/session";
+import {redirect} from "next/navigation";
 
 //////////////////////////
 /// Register
@@ -35,9 +37,8 @@ export const signup = async (state: FormState, formData: FormData) => {
     const setUser = await User.create({first_name, last_name, email, password: hashedPassword});
     if (setUser._id) {
         console.log(`[server]: User ${setUser._id.toString()} created successfully.`);
-        return {
-            message: "User created successfully... Redirecting"
-        }
+        await createSession(setUser._id.toString());
+        redirect('/')
     }
 }
 

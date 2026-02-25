@@ -1,19 +1,10 @@
 'use client'
-import React, {useActionState, useEffect} from 'react'
+import React, {useActionState} from 'react'
 import {signup} from "@/lib/services/actions";
-import {useRouter} from "next/navigation";
 
 const SignUpForm = () => {
     const [state, action, pending] = useActionState(signup, undefined);
-    const router = useRouter();
-    useEffect(() => {
-        if (state?.message) {
-            const timer = setTimeout(() => {
-                router.push('/login')
-            }, 1000)
-            return () => clearTimeout(timer)
-        }
-    }, [state?.message, router])
+
     return (
         <form action={action} className={'border size-64 bg-white flex flex-col'}>
             <div className={'flex flex-col'}>

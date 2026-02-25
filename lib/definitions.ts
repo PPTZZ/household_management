@@ -63,3 +63,11 @@ export type TExpenses = Document & {
     hot_water: number;
     internet: number;
 }
+/////////////////////////////////
+/// Session Types
+////////////////////////////////
+export type TSessionPayload = {
+    userId?: string;
+    expiresAt?: Date;
+    role?: string | undefined;
+}
