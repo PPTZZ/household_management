@@ -1,10 +1,10 @@
 'use server'
-import {FormState, SignupSchema} from '@/lib/definitions'
-import bcrypt from 'bcrypt'
 import dbConnect from "@/lib/db/connection";
+import {FormState, SignupSchema} from '@/lib/definitions'
 import User from "@/lib/db/schemas/user";
-import {createSession} from "@/lib/services/session";
+import {createSession, deleteSession} from "@/lib/services/session";
 import {redirect} from "next/navigation";
+import bcrypt from 'bcrypt'
 
 //////////////////////////
 /// Register
@@ -34,6 +34,7 @@ export const signup = async (state: FormState, formData: FormData) => {
             }
         }
     }
+
     const setUser = await User.create({first_name, last_name, email, password: hashedPassword});
     if (setUser._id) {
         console.log(`[server]: User ${setUser._id.toString()} created successfully.`);
@@ -46,3 +47,12 @@ export const signup = async (state: FormState, formData: FormData) => {
 //////////////////////////
 /// Login
 //////////////////////////
+
+
+//////////////////////////
+/// Logout
+//////////////////////////
+export async function logout() {
+    await deleteSession()
+    redirect('/login')
+}
