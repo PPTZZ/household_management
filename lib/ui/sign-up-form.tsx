@@ -26,7 +26,6 @@ const SignUpForm = () => {
                 <label htmlFor="password">Password</label>
                 <input className={'border'} id="password" name="password" type="password"/>
             </div>
-            {state?.message && <p>{state.message}</p>}
             {state?.errors?.password && (
                 <div>
                     <p>Password must:</p>

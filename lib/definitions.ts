@@ -25,7 +25,9 @@ export const SignupSchema = z.object({
         })
         .trim(),
 })
-export type FormState =
+
+
+export type TSignupFormState =
     | {
     errors?: {
         first_name?: string[] | string
@@ -33,9 +35,24 @@ export type FormState =
         email?: string[] | string
         password?: string[] | string
     }
-    message?: string
 }
     | undefined
+
+
+export type TErrors = {
+    password?: string;
+    email?: string;
+    text?: string;
+    cookie?: string;
+    fetchError?: unknown;
+}
+
+
+export type TLoginFormState = | {
+    errors?: TErrors;
+
+} | undefined
+
 /////////////////////////////////
 /// DB Schema Types
 ////////////////////////////////

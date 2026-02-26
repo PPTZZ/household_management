@@ -1,13 +1,16 @@
-import {Metadata} from "next";
 import React from 'react'
+import {Metadata} from "next";
+import LoginForm from "@/lib/ui/login-form";
 
 export const metadata: Metadata = {
     title: 'Login'
 };
 
-const Login = () => {
+const Register = () => {
     return (
-        <div>Login</div>
+        <div className={'flex justify-center items-center h-screen'}>
+            <LoginForm/>
+        </div>
     )
 }
-export default Login
+export default Register

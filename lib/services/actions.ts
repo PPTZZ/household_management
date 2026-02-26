@@ -1,15 +1,17 @@
 'use server'
 import dbConnect from "@/lib/db/connection";
-import {FormState, SignupSchema} from '@/lib/definitions'
+import {SignupSchema, TErrors, TLoginFormState, TSignupFormState} from '@/lib/definitions'
 import User from "@/lib/db/schemas/user";
 import {createSession, deleteSession} from "@/lib/services/session";
 import {redirect} from "next/navigation";
 import bcrypt from 'bcrypt'
+import * as z from 'zod'
+
 
 //////////////////////////
 /// Register
 //////////////////////////
-export const signup = async (state: FormState, formData: FormData) => {
+export const signup = async (state: TSignupFormState, formData: FormData) => {
     const validateForm = SignupSchema.safeParse({
         first_name: formData.get('first_name'),
         last_name: formData.get('last_name'),
@@ -18,8 +20,9 @@ export const signup = async (state: FormState, formData: FormData) => {
     });
 
     if (!validateForm.success) {
+        console.log(z.treeifyError(validateForm.error))
         return {
-            errors: validateForm.error.flatten().fieldErrors,
+            errors: validateForm.error.flatten().fieldErrors
         }
     }
 
@@ -47,12 +50,48 @@ export const signup = async (state: FormState, formData: FormData) => {
 //////////////////////////
 /// Login
 //////////////////////////
+export const login = async (prevState: TLoginFormState, formData: FormData): Promise<TLoginFormState> => {
+    const errors: TErrors = {}
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
 
+    if (!email) errors.email = 'Email is required'
+    if (!password) errors.password = 'Password is required'
+
+    if (Object.keys(errors).length > 0) {
+        return {errors};
+    }
+
+    try {
+        await dbConnect();
+        const user = await User.findOne({email: email});
+        if (!user) errors.email = `${email} is not a valid user`;
+        if (Object.keys(errors).length > 0) {
+            return {errors};
+        }
+        const match = bcrypt.compareSync(password, user.password);
+        if (match) {
+            // TO DO - ADD REDIRECT AFTER SUCCESSFUL LOGIN LOGIC
+            return;
+        } else {
+            errors.password = 'Password is incorrect';
+            return {errors}
+        }
+
+
+    } catch (error) {
+        return {
+            errors: {
+                fetchError: error
+            }
+        };
+    }
+}
 
 //////////////////////////
 /// Logout
 //////////////////////////
-export async function logout() {
+export const logout = async () => {
     await deleteSession()
     redirect('/login')
 }
