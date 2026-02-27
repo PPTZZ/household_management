@@ -1,16 +1,28 @@
 'use server'
 import dbConnect from "@/lib/db/connection";
-import {SignupSchema, TErrors, TLoginFormState, TSignupFormState} from '@/lib/definitions'
+import {
+    CreateHouseholdSchema,
+    SignupSchema,
+    TCreateHouseholdState,
+    TErrors,
+    THousehold,
+    TLoginFormState,
+    TSignupFormState
+} from '@/lib/definitions'
 import User from "@/lib/db/schemas/user";
-import {createSession, deleteSession} from "@/lib/services/session";
+import {createSession, decrypt, deleteSession} from "@/lib/services/session";
 import {redirect} from "next/navigation";
 import bcrypt from 'bcrypt'
 import * as z from 'zod'
+import {cookies} from "next/headers";
+import Household from "@/lib/db/schemas/household";
+import {revalidatePath} from "next/cache";
 
 
 //////////////////////////
-/// Register
+/// AUTH
 //////////////////////////
+// Register //////////////
 export const signup = async (state: TSignupFormState, formData: FormData) => {
     const validateForm = SignupSchema.safeParse({
         first_name: formData.get('first_name'),
@@ -47,9 +59,7 @@ export const signup = async (state: TSignupFormState, formData: FormData) => {
 }
 
 
-//////////////////////////
-/// Login
-//////////////////////////
+// Login /////////////////
 export const login = async (prevState: TLoginFormState, formData: FormData): Promise<TLoginFormState> => {
     const errors: TErrors = {}
     const email = formData.get('email') as string;
@@ -71,14 +81,13 @@ export const login = async (prevState: TLoginFormState, formData: FormData): Pro
         }
         const match = bcrypt.compareSync(password, user.password);
         if (match) {
-            // TO DO - ADD REDIRECT AFTER SUCCESSFUL LOGIN LOGIC
-            return;
+            console.log(`[server]: User ${user._id.toString()} logged in successfully.`);
+            await createSession(user._id.toString());
+
         } else {
             errors.password = 'Password is incorrect';
             return {errors}
         }
-
-
     } catch (error) {
         return {
             errors: {
@@ -86,12 +95,67 @@ export const login = async (prevState: TLoginFormState, formData: FormData): Pro
             }
         };
     }
+    return redirect('/');
 }
 
-//////////////////////////
-/// Logout
-//////////////////////////
+
+// Logout ////////////////
 export const logout = async () => {
     await deleteSession()
     redirect('/login')
+}
+
+//////////////////////////
+/// Households
+//////////////////////////
+// Create ////////////////
+export const createHouseHold = async (state: TCreateHouseholdState, formData: FormData) => {
+    const cookie = (await cookies()).get('session')?.value;
+    const session = await decrypt(cookie);
+
+    const validateHouseholdName = CreateHouseholdSchema.safeParse({
+        name: formData.get('household_name')
+    });
+    if (!validateHouseholdName.success) {
+        return {
+            errors: validateHouseholdName.error.flatten().fieldErrors
+        }
+    }
+    try {
+        await dbConnect();
+        const createdHousehold: THousehold = await Household.create({
+            name: formData.get('household_name'),
+            owner: session?.userId,
+            members: [session?.userId]
+        });
+        console.log(`[server]: Household ${createdHousehold._id.toString()} created successfully.`);
+
+    } catch (error) {
+        return {
+            errors: error
+        }
+    }
+    revalidatePath('/dashboard')
+    return undefined
+
+}
+
+// Delete ////////////////
+export const deleteHousehold = async () => {
+    await dbConnect();
+    await Household.findByIdAndDelete('699dc337da84eb26996d3250')
+    revalidatePath('/dashboard')
+}
+
+// Get ///////////////////
+export const getHouseholds = async () => {
+    const cookie = (await cookies()).get('session')?.value;
+    const session = await decrypt(cookie);
+    try {
+        await dbConnect()
+        const households: THousehold[] = await Household.find({members: session?.userId});
+        return households;
+    } catch (error) {
+        throw new Error("getHousehold error");
+    }
 }

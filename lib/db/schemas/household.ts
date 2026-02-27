@@ -6,14 +6,24 @@ const householdSchema: Schema<THousehold> = new Schema({
         type: String,
         required: true
     },
+    owner: {
+        type: String,
+        required: true
+    },
     members: [{
+        default: '',
         type: String,
         ref: 'User'
     }],
     expenses: [{
+        default: '',
         type: String,
         ref: 'Expense'
-    }]
+    }],
+    background: {
+        default: '',
+        type: String,
+    }
 }, {
     timestamps: true
 })

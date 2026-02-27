@@ -1,6 +1,7 @@
 'use client'
 import React, {useActionState} from 'react'
 import {login} from "@/lib/services/actions";
+import Button from "@/lib/ui/button";
 
 const LoginForm = () => {
     const [state, action, pending] = useActionState(login, undefined);
@@ -16,7 +17,7 @@ const LoginForm = () => {
                     <label htmlFor="password">Password</label>
                     <input className={'border'} id="password" name="password" type="password"/>
                 </div>
-                <button disabled={pending} type="submit">Login</button>
+                <Button>Login</Button>
             </form>
             {state?.errors?.email && (
                 <p className="text-red-500 text-sm">{state.errors.email}</p>

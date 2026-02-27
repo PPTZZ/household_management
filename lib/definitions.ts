@@ -1,5 +1,6 @@
 import {Document} from "mongoose";
 import * as z from "zod";
+import {ReactNode} from "react";
 
 
 /////////////////////////////////
@@ -56,6 +57,20 @@ export type TLoginFormState = | {
 /////////////////////////////////
 /// DB Schema Types
 ////////////////////////////////
+export const CreateHouseholdSchema = z.object({
+    name: z
+        .string()
+        .min(2, {error: 'Household name must be at least 2 characters long.'})
+        .trim(),
+})
+export type TCreateHouseholdState =
+    | {
+    errors?: {
+        name?: string[] | string
+    }
+}
+    | undefined
+
 export type TUser = Document & {
     _id?: string;
     email: string;
@@ -67,8 +82,10 @@ export type TUser = Document & {
 export type THousehold = Document & {
     _id?: string;
     name: string;
+    owner: string;
     members: string[];
     expenses: string[];
+    background: string;
 };
 export type TExpenses = Document & {
     _id?: string;
@@ -79,6 +96,11 @@ export type TExpenses = Document & {
     cold_water: number;
     hot_water: number;
     internet: number;
+};
+export type TThemes = Document & {
+    _id?: string;
+    name: string;
+    value: string;
 }
 /////////////////////////////////
 /// Session Types
@@ -87,4 +109,11 @@ export type TSessionPayload = {
     userId?: string;
     expiresAt?: Date;
     role?: string | undefined;
+}
+/////////////////////////////////
+/// UI
+////////////////////////////////
+export type TButtonProps = {
+    children: ReactNode;
+    action?: () => void | Promise<void>;
 }

@@ -1,6 +1,7 @@
 'use client'
 import React, {useActionState} from 'react'
 import {signup} from "@/lib/services/actions";
+import Button from "@/lib/ui/button";
 
 const SignUpForm = () => {
     const [state, action, pending] = useActionState(signup, undefined);
@@ -36,7 +37,7 @@ const SignUpForm = () => {
                     </ul>
                 </div>
             )}
-            <button disabled={pending} type="submit">Sign Up</button>
+            <Button>Sign Up</Button>
         </form>
     )
 }

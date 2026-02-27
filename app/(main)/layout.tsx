@@ -1,6 +1,9 @@
 import type {Metadata, Viewport} from "next";
 import "@/app/globals.css";
 import React from "react";
+import Sidebar from "@/lib/ui/sidebar";
+import {cookies} from "next/headers";
+import {decrypt} from "@/lib/services/session";
 
 
 export const metadata: Metadata = {
@@ -17,9 +20,9 @@ export const viewport: Viewport = {
 }
 
 
-export default function RootLayout({
-                                       children,
-                                   }: Readonly<{
+export default async function RootLayout({
+                                             children,
+                                         }: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
