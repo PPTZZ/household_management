@@ -143,7 +143,7 @@ export const createHouseHold = async (state: TCreateHouseholdState, formData: Fo
 // Delete ////////////////
 export const deleteHousehold = async () => {
     await dbConnect();
-    await Household.findByIdAndDelete('699dc337da84eb26996d3250')
+    await Household.findByIdAndDelete('69a19170ada368d6c2a1649b')
     revalidatePath('/dashboard')
 }
 
@@ -159,3 +159,27 @@ export const getHouseholds = async () => {
         throw new Error("getHousehold error");
     }
 }
+
+export const getSingleHousehold = async (id: string) => {
+    await dbConnect();
+
+    const household = await Household.findById(id);
+
+    if (!household) {
+        throw new Error('Household not found');
+    }
+
+    // Check if members array exists and has items
+    if (!household.members || household.members.length === 0) {
+        return {household, members: []};
+    }
+
+    const members = await User.find({
+        _id: {$in: household.members}
+    });
+
+    console.log(members);
+
+    return {household, members};
+}
+/////////////////////////////////////// TO DO FETCH ALL MEMBERS//////////////////////////////////////////////////////////

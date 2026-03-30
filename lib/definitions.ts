@@ -117,3 +117,12 @@ export type TButtonProps = {
     children: ReactNode;
     action?: () => void | Promise<void>;
 }
+export type THouseholdCardProps = {
+    owner: string;
+    members: string[];
+    title: string;
+}
+
+export type  TPageProps = {
+    params: Promise<{ householdId: string }>
+}
