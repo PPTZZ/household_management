@@ -65,8 +65,11 @@ export const CreateHouseholdSchema = z.object({
 })
 export type TCreateHouseholdState =
     | {
+    message?: string,
+    success?: boolean,
     errors?: {
-        name?: string[] | string
+        _form?: string[] | string,
+        name?: string[] | undefined
     }
 }
     | undefined
@@ -115,7 +118,8 @@ export type TSessionPayload = {
 ////////////////////////////////
 export type TButtonProps = {
     children: ReactNode;
-    action?: () => void | Promise<void>;
+    asyncAction?: () => void | Promise<void>;
+    syncAction?: () => void;
 }
 export type THouseholdCardProps = {
     owner: string;

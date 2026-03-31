@@ -17,7 +17,7 @@ const Dashboard = async () => {
                     return (
                         <Link key={i} href={`/dashboard/${householdId}`}>
                             <HouseHold owner={household.owner} members={household.members}
-                                       title={household._id.toString()}/>
+                                       title={household.name}/>
                         </Link>
                     )
                 })}

@@ -7,7 +7,8 @@ import {
     TErrors,
     THousehold,
     TLoginFormState,
-    TSignupFormState
+    TSignupFormState,
+    TUser
 } from '@/lib/definitions'
 import User from "@/lib/db/schemas/user";
 import {createSession, decrypt, deleteSession} from "@/lib/services/session";
@@ -17,6 +18,7 @@ import * as z from 'zod'
 import {cookies} from "next/headers";
 import Household from "@/lib/db/schemas/household";
 import {revalidatePath} from "next/cache";
+import mongoose from "mongoose";
 
 
 //////////////////////////
@@ -109,18 +111,23 @@ export const logout = async () => {
 /// Households
 //////////////////////////
 // Create ////////////////
-export const createHouseHold = async (state: TCreateHouseholdState, formData: FormData) => {
+export const createHouseHold = async (
+    state: TCreateHouseholdState,
+    formData: FormData
+): Promise<TCreateHouseholdState> => {
     const cookie = (await cookies()).get('session')?.value;
     const session = await decrypt(cookie);
 
     const validateHouseholdName = CreateHouseholdSchema.safeParse({
         name: formData.get('household_name')
     });
+
     if (!validateHouseholdName.success) {
         return {
             errors: validateHouseholdName.error.flatten().fieldErrors
-        }
+        };
     }
+
     try {
         await dbConnect();
         const createdHousehold: THousehold = await Household.create({
@@ -130,20 +137,26 @@ export const createHouseHold = async (state: TCreateHouseholdState, formData: Fo
         });
         console.log(`[server]: Household ${createdHousehold._id.toString()} created successfully.`);
 
-    } catch (error) {
-        return {
-            errors: error
-        }
-    }
-    revalidatePath('/dashboard')
-    return undefined
+        revalidatePath('/dashboard');
 
-}
+        return {
+            success: true,
+            message: 'Household created successfully'
+        };
+    } catch (error) {
+        console.error('Error creating household:', error);
+        return {
+            errors: {
+                _form: ['Failed to create household. Please try again.']
+            }
+        };
+    }
+};
 
 // Delete ////////////////
-export const deleteHousehold = async () => {
+export const deleteHousehold = async (id: string) => {
     await dbConnect();
-    await Household.findByIdAndDelete('69a19170ada368d6c2a1649b')
+    await Household.findByIdAndDelete(id)
     revalidatePath('/dashboard')
 }
 
@@ -162,24 +175,26 @@ export const getHouseholds = async () => {
 
 export const getSingleHousehold = async (id: string) => {
     await dbConnect();
-
-    const household = await Household.findById(id);
-
-    if (!household) {
-        throw new Error('Household not found');
-    }
-
-    // Check if members array exists and has items
-    if (!household.members || household.members.length === 0) {
-        return {household, members: []};
-    }
-
+    const household = await Household.findById(id).select(['members', 'owner', 'name', 'expenses', 'background']).lean();
+    // GET household members
+    const validMemberIds = household.members.reduce((acc: mongoose.Types.ObjectId[], id: string) => {
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            acc.push(new mongoose.Types.ObjectId(id));
+        }
+        return acc;
+    }, []);
     const members = await User.find({
-        _id: {$in: household.members}
-    });
+        _id: {$in: validMemberIds}
+    })
+        .select('-password')
+        .lean<TUser[]>();
 
-    console.log(members);
 
-    return {household, members};
+    return {
+        members,
+        expenses: household.expenses,
+        owner: household.owner,
+        name:household.name,
+        background:household.background
+    }
 }
-/////////////////////////////////////// TO DO FETCH ALL MEMBERS//////////////////////////////////////////////////////////
